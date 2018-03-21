@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icons/social-icons.html">
 
 <dom-module id="pm-header">
   <template>
@@ -98,8 +99,11 @@
       nav>ul>li>div ul>li:hover>a {
         background-color: rgba( 255, 255, 255, 0.1);
       }
+
+      .right {
+        float: right;
+      }
     </style>
-    <!-- <h2>[[prop1]]</h2> -->
 
     <nav>
       <ul>
@@ -121,6 +125,16 @@
             </ul>
           </div>
         </li>
+
+        <li class="right">
+          <a href="#">
+            <iron-icon icon="social:notifications-none"></iron-icon>
+            [[count]]
+          </a>
+          <div>
+
+          </div>
+        </li>
       </ul>
     </nav>
 
@@ -136,12 +150,43 @@
      * @demo demo/index.html
      */
     class PmHeader extends Polymer.Element {
+
+      constructor() {
+        super();
+        this._boundListener = this.alertHandler.bind(this);
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        window.addEventListener('alert', this._boundListener);
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        // We must remove listeners to prevent memory leaks.
+        window.removeEventListener('alert', this._boundListener);
+      }
+
+      alertHandler(alerts) {
+        ++this.count;
+      }
+
+      static alert(alerts) {
+        var event = new CustomEvent('alert', { bubbles: true, composed: true });
+        window.dispatchEvent(event);
+      }
+
       static get is() { return 'pm-header'; }
 
       static get properties() {
         return {
           theme: {
             type: String
+          },
+          count: {
+            type: Number,
+            notify: true,
+            value: 4
           }
         };
       }
