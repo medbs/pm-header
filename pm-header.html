@@ -114,15 +114,11 @@
           </a>
           <div>
             <ul>
-              <li>
-                <a href="#">Module 1</a>
-              </li>
-              <li>
-                <a href="#">Module 2</a>
-              </li>
-              <li>
-                <a href="#">Module 3</a>
-              </li>
+              <template is="dom-repeat" items="{{addons}}">
+                <li>
+                  <a href="http://localhost:8080[[item.menu_item.link]]">[[item.menu_item.label]]</a>
+                </li>
+              </template>
             </ul>
           </div>
         </li>
@@ -156,6 +152,35 @@
         super();
         this._boundListener = this.alertHandler.bind(this);
       }
+
+        getAddonsSync(Url) {
+
+            var request = new XMLHttpRequest();
+            request.open('GET', Url, false);  // `false` makes the request synchronous
+            request.send(null);
+
+            if (request.status === 200) {
+                return JSON.parse(request.responseText);
+            }
+        }
+
+
+        getAddonsAsync(Url) {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var Addon = JSON.parse(this.responseText);
+                    return Addon;
+                    // console.log(Addon[0].id);
+                    // console.log(typeof(Addon));
+
+                }
+            };
+            xmlhttp.open("GET", Url, true);
+            xmlhttp.send();
+
+        }
+
 
       connectedCallback() {
         super.connectedCallback();
@@ -209,6 +234,10 @@
             break;
         }
         this.updateStyles({ '--main-bg-color': color });
+
+          this.addons = this.getAddonsSync("http://localhost:8080/pm/api/modules");
+          console.log(this.addons[0].menu_item.link);
+
       }
     }
 
